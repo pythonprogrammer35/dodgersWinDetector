@@ -1,5 +1,5 @@
 import requests
-import datetime
+from datetime import date, timedelta
 from dotenv import load_dotenv
 
 
@@ -10,20 +10,20 @@ import smtplib
 from email.mime.text import MIMEText
 
 
-
 BASE_URL = "https://statsapi.mlb.com/api/v1"
 
 #Need to work on date selecting function
 
 def targetDate():
-    pass
+    yesterday = date.today() - timedelta(days=1)
+    yesterday_str = yesterday.isoformat()
 
-#SMS don't work 
+    return yesterday_str
+
 def sendNotification():
     # Email account settings
     SENDER_EMAIL = "dodgerbot90@gmail.com"
     # For Gmail, generate an "App Password" at: myaccount.google.com/apppasswords
-    #if you want the app_password ask me
     APP_PASSWORD = "bczl ytpi imwa ljmn"
 
     # Your recipient phone address
@@ -41,17 +41,18 @@ def sendNotification():
 
     print("Email sent!")
 
+yesterday = targetDate()
 
 schedule_resp = requests.get(
     f"{BASE_URL}/schedule",
-    params={"sportId": 1, "date": "2026-10-03"}
+    params={"sportId": 1, "date": yesterday}
 )
 schedule_data = schedule_resp.json()
 
 #Check if we won at home
+
 for date in schedule_data.get("dates", []):
     for game in date.get("games", []):
-        
         
         away = game["teams"]["away"]["team"]["name"]
         home = game["teams"]["home"]["team"]["name"]
