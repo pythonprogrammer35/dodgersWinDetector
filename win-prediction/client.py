@@ -51,6 +51,15 @@ def tool_result_text(result) -> str:
     return "\n".join(parts) if parts else json.dumps(result.structured_content)
 
 
+def clean_args(tools: list[dict], name: str, args) -> dict:
+    """Keep only arguments the tool declares; small models often invent extras."""
+    for t in tools:
+        if t["function"]["name"] == name:
+            allowed = t["function"]["parameters"].get("properties", {})
+            return {k: v for k, v in dict(args or {}).items() if k in allowed}
+    return {}
+
+
 ChatMessage = dict | ollama.Message  # ollama.chat accepts either
 
 async def ask(session: ClientSession, tools: list[dict], messages: list[ChatMessage]) -> str:
@@ -61,7 +70,8 @@ async def ask(session: ClientSession, tools: list[dict], messages: list[ChatMess
         if not msg.tool_calls:
             return msg.content or ""
         for call in msg.tool_calls:
-            name, args = call.function.name, dict(call.function.arguments or {})
+            name, args = call.function.name, clean_args(tools, call.function.name,
+                                                        call.function.arguments)
             print(f"  [tool] {name}({args})", file=sys.stderr)
             result = await session.call_tool(name, args)
             messages.append({"role": "tool", "tool_name": name, "content": tool_result_text(result)})

@@ -95,12 +95,15 @@ def get_dodgers_home_games(start: date, days: int) -> list[dict]:
             if g.get("status", {}).get("abstractGameState") == "Final":
                 continue
             start_utc = datetime.fromisoformat(g["gameDate"].replace("Z", "+00:00"))
+            start_pt = start_utc.astimezone(PACIFIC)
             games.append(
                 {
                     "game_pk": g["gamePk"],
                     "date": g.get("officialDate", day.get("date")),
                     "start_time_utc": start_utc.isoformat(),
-                    "start_time_pacific": start_utc.astimezone(PACIFIC).isoformat(),
+                    # human-readable time so small LLMs quote it instead of misreading the UTC stamp
+                    "when": start_pt.strftime("%A, %B %-d, %Y at %-I:%M %p Pacific"),
+                    "start_time_pacific": start_pt.isoformat(),
                     "opponent": g["teams"]["away"]["team"]["name"],
                     "game_number": g.get("gameNumber", 1),
                     "game_type": g.get("gameType"),
