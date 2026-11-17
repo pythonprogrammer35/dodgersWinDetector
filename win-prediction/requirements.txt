@@ -1,0 +1,5 @@
+mcp[cli]>=2.3,<3
+httpx>=0.28
+ollama>=0.6
+pytest>=9
+respx>=0.23
