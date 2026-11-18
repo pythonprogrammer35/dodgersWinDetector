@@ -1,0 +1,12 @@
+{
+  "name": "dodgerwin",
+  "private": true,
+  "description": "Repo-root shortcuts; the app lives in frontend/.",
+  "scripts": {
+    "postinstall": "npm --prefix frontend install",
+    "dev": "npm --prefix frontend run dev",
+    "dev:web": "npm --prefix frontend run dev:web",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview"
+  }
+}
