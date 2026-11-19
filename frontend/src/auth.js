@@ -25,10 +25,10 @@ export async function sendCode(phoneDigits) {
   return { phone: '+1' + phoneDigits };
 }
 
-export async function verifyCode(phone, code) {
+export async function verifyCode(phone, code, name) {
   if (!/^\d{6}$/.test(code)) throw new Error('Enter all 6 digits of the code.');
   await new Promise((r) => setTimeout(r, 400));
-  const session = { phone, signedInAt: new Date().toISOString() };
+  const session = { name, phone, signedInAt: new Date().toISOString() };
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } catch {

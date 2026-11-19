@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import Logo from '../components/Logo.jsx';
+import UserMenu from '../components/UserMenu.jsx';
 import useAsync from '../useAsync.js';
 import {
   currentSeason,
@@ -33,8 +34,12 @@ export default function Stats({ session, onSignOut }) {
           <Logo />
           <nav aria-label="Main" className="topbar__nav">
             <a href="#/stats" aria-current="page" className="nav-link nav-link--active">Game stats</a>
-            <span className="nav-phone" title="Signed in">{session.phone}</span>
-            <button type="button" className="nav-link nav-link--muted" onClick={onSignOut}>Sign out</button>
+            {/* TODO: My alerts page (alert history, pause/unsubscribe). Enable once it exists. */}
+            <button type="button" className="nav-link nav-link--soon" disabled title="Coming soon">
+              My alerts <span className="soon-tag">Soon</span>
+            </button>
+            <UserMenu session={session} />
+            <button type="button" className="nav-link" onClick={onSignOut}>Sign out</button>
           </nav>
         </div>
       </header>
@@ -42,7 +47,7 @@ export default function Stats({ session, onSignOut }) {
       <main className="container page">
         <div className="page__head">
           <div className="stack-6">
-            <h1 className="display page__title">Game Day</h1>
+            <h1 className="display page__title">{session.name ? `Welcome, ${session.name}` : 'Welcome'}</h1>
             <p className="muted">Results, season stats, and the odds of the next discount.</p>
           </div>
           <span className="chip-outline">{currentSeason()} season · MLB Stats API &amp; Kalshi</span>
@@ -77,7 +82,7 @@ function NextGame({ prob, nextGame }) {
   let reason = null;
   if (prob.loading) reason = 'Checking Kalshi…';
   else if (prob.error) reason = 'Win-probability service is unreachable right now.';
-  else if (!available) reason = p?.reason || p?.error || 'No Kalshi probability yet.';
+  else if (!available) reason = 'No markets available just yet — check back soon!';
 
   return (
     <section aria-labelledby="next-h" className="card card--next">
@@ -101,32 +106,30 @@ function NextGame({ prob, nextGame }) {
         )}
       </div>
 
-      <div className="winprob">
-        <div className="stack-2">
-          <span className="display winprob__big">{winRounded == null ? '—' : `${winRounded}%`}</span>
-          <span className="muted">chance the Dodgers win</span>
+      {winRounded == null ? (
+        <p className="winprob__empty" role="status">{reason}</p>
+      ) : (
+        <div className="winprob">
+          <div className="stack-2">
+            <span className="display winprob__big">{winRounded}%</span>
+            <span className="muted">chance the Dodgers win</span>
+          </div>
+          <div className="winprob__meter">
+            <div
+              role="img"
+              aria-label={`Win probability: Dodgers ${winRounded} percent, opponent ${100 - winRounded} percent`}
+              className="split-bar"
+            >
+              <div className="split-bar__us" style={{ width: `${win}%` }} />
+              <div className="split-bar__them" />
+            </div>
+            <div className="split-bar__labels">
+              <span className="text-us">LAD {winRounded}%</span>
+              <span className="text-them">OPP {100 - winRounded}%</span>
+            </div>
+          </div>
         </div>
-        <div className="winprob__meter">
-          {winRounded == null ? (
-            <p className="muted winprob__reason">{reason}</p>
-          ) : (
-            <>
-              <div
-                role="img"
-                aria-label={`Win probability: Dodgers ${winRounded} percent, opponent ${100 - winRounded} percent`}
-                className="split-bar"
-              >
-                <div className="split-bar__us" style={{ width: `${win}%` }} />
-                <div className="split-bar__them" />
-              </div>
-              <div className="split-bar__labels">
-                <span className="text-us">LAD {winRounded}%</span>
-                <span className="text-them">OPP {100 - winRounded}%</span>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      )}
 
       <div className="drivers">
         <h3 className="drivers__title">Kalshi market</h3>
@@ -173,12 +176,12 @@ function LastGame({ games }) {
       {g && (
         <>
           <div className="stack-10">
-            <div className={`score-line ${g.won ? '' : 'score-line--dim'}`}>
-              <span className="score-line__team">Dodgers</span>
+            <div className={`score-line ${g.won ? 'score-line--win' : 'score-line--dim'}`}>
+              <span className="display score-line__team">Dodgers</span>
               <span className="display score-line__runs">{g.ourScore}</span>
             </div>
-            <div className={`score-line ${g.won ? 'score-line--dim' : ''}`}>
-              <span className="score-line__team">{g.opponent}</span>
+            <div className={`score-line ${g.won ? 'score-line--dim' : 'score-line--loss'}`}>
+              <span className="display score-line__team">{g.opponent}</span>
               <span className="display score-line__runs">{g.theirScore}</span>
             </div>
             <span className="muted small">{formatDate(g.start, { month: 'short', day: 'numeric', year: 'numeric' })} · {g.home ? 'Home' : 'Away'}</span>
@@ -251,7 +254,7 @@ function RecentGames({ games }) {
                 <td className="dim">{g.home ? 'Home' : 'Away'}</td>
                 <td className={g.won ? 'result result--w' : 'result result--l'}>{score(g)}</td>
                 <td className={g.home && g.won ? 'text-good' : 'faint'}>
-                  {!g.home ? 'Away game' : g.won ? 'Unlocked' : '—'}
+                  {!g.home ? 'Away game' : g.won ? 'Unlocked' : 'No discount'}
                 </td>
               </tr>
             ))}
@@ -285,7 +288,7 @@ function UpcomingChart({ upcoming }) {
     <section aria-labelledby="trend-h" className="card card--narrow">
       <div className="stack-4">
         <h2 id="trend-h" className="section-title">Upcoming home games</h2>
-        <span className="muted small">Next 14 days · Kalshi win probability · outline = no market yet</span>
+        <span className="muted small">Next 14 days</span>
       </div>
       {empty ? (
         <p className="muted chart-empty">{empty}</p>
