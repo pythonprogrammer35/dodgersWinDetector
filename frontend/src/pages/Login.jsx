@@ -17,6 +17,7 @@ const MailIcon = () => (
 
 export default function Login({ onSignedIn }) {
   const [step, setStep] = useState('phone');
+  const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [human, setHuman] = useState(false);
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
@@ -40,6 +41,7 @@ export default function Login({ onSignedIn }) {
   function submitPhone(e) {
     e.preventDefault();
     const d = normalizePhone(phone);
+    if (!name.trim()) return setError('Enter your name.');
     if (!d) return setError('Enter a 10-digit US mobile number.');
     if (!human) return setError('Please confirm you’re not a robot.');
     run(async () => {
@@ -54,7 +56,7 @@ export default function Login({ onSignedIn }) {
   function submitCode(e) {
     e.preventDefault();
     run(async () => {
-      const session = await verifyCode('+1' + normalizePhone(phone), digits.join(''));
+      const session = await verifyCode('+1' + normalizePhone(phone), digits.join(''), name.trim());
       onSignedIn(session);
     });
   }
@@ -108,6 +110,22 @@ export default function Login({ onSignedIn }) {
                 <span className="eyebrow">Step 1 of 2</span>
                 <h2 className="display login__title">Sign in</h2>
                 <p className="muted">We'll text a 6-digit code to verify it's you.</p>
+              </div>
+
+              <div className="stack-8">
+                <label htmlFor="name" className="field-label">Name</label>
+                <input
+                  id="name"
+                  className="input"
+                  type="text"
+                  autoComplete="name"
+                  maxLength={60}
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  aria-invalid={!!error && !name.trim()}
+                  aria-describedby={error ? 'login-error' : undefined}
+                />
               </div>
 
               <div className="stack-8">
