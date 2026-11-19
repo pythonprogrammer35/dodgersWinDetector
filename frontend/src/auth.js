@@ -19,16 +19,20 @@ export function formatPhone(digits) {
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 }
 
+export function isValidEmail(input) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
+}
+
 export async function sendCode(phoneDigits) {
   if (!normalizePhone(phoneDigits)) throw new Error('Enter a 10-digit US mobile number.');
   await new Promise((r) => setTimeout(r, 400));
   return { phone: '+1' + phoneDigits };
 }
 
-export async function verifyCode(phone, code, name) {
+export async function verifyCode(phone, code, name, email) {
   if (!/^\d{6}$/.test(code)) throw new Error('Enter all 6 digits of the code.');
   await new Promise((r) => setTimeout(r, 400));
-  const session = { name, phone, signedInAt: new Date().toISOString() };
+  const session = { name, email: email?.trim().toLowerCase(), phone, signedInAt: new Date().toISOString() };
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } catch {

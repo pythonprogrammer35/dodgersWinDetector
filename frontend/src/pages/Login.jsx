@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import Logo from '../components/Logo.jsx';
-import { formatPhone, normalizePhone, sendCode, verifyCode } from '../auth.js';
+import { formatPhone, isValidEmail, normalizePhone, sendCode, verifyCode } from '../auth.js';
 
 const LockIcon = () => (
   <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -18,6 +18,7 @@ const MailIcon = () => (
 export default function Login({ onSignedIn }) {
   const [step, setStep] = useState('phone');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [human, setHuman] = useState(false);
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
@@ -42,6 +43,7 @@ export default function Login({ onSignedIn }) {
     e.preventDefault();
     const d = normalizePhone(phone);
     if (!name.trim()) return setError('Enter your name.');
+    if (!isValidEmail(email)) return setError('Enter a valid email address.');
     if (!d) return setError('Enter a 10-digit US mobile number.');
     if (!human) return setError('Please confirm you’re not a robot.');
     run(async () => {
@@ -56,7 +58,7 @@ export default function Login({ onSignedIn }) {
   function submitCode(e) {
     e.preventDefault();
     run(async () => {
-      const session = await verifyCode('+1' + normalizePhone(phone), digits.join(''), name.trim());
+      const session = await verifyCode('+1' + normalizePhone(phone), digits.join(''), name.trim(), email.trim());
       onSignedIn(session);
     });
   }
@@ -93,7 +95,7 @@ export default function Login({ onSignedIn }) {
             Cheap lunch.
           </h1>
           <p className="login__lede">
-            When the Dodgers win at home, we text you the Panda Express discount code — no need to watch the game.
+            When the Dodgers win at home, we text and email you the Panda Express discount code — no need to watch the game.
           </p>
         </div>
         <ul className="login__points">
@@ -124,6 +126,23 @@ export default function Login({ onSignedIn }) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   aria-invalid={!!error && !name.trim()}
+                  aria-describedby={error ? 'login-error' : undefined}
+                />
+              </div>
+
+              <div className="stack-8">
+                <label htmlFor="email" className="field-label">Email</label>
+                <input
+                  id="email"
+                  className="input"
+                  type="email"
+                  autoComplete="email"
+                  inputMode="email"
+                  maxLength={254}
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  aria-invalid={!!error && !isValidEmail(email)}
                   aria-describedby={error ? 'login-error' : undefined}
                 />
               </div>

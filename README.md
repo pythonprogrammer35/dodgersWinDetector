@@ -67,5 +67,5 @@ To point a production build at the deployed API, set `VITE_API_BASE_URL` (see
 
 - Real SMS sign-in (`frontend/src/auth.js` is a stub)
 - A real CAPTCHA on sign-in
-- Promo-code delivery: the dashboard tells users to check their texts
+- Discount alerts by SMS and email (alert Lambda; SNS/Twilio for texts, SES for email). The dashboard tells users to check their texts
 - AWS deployment of the win-probability API
