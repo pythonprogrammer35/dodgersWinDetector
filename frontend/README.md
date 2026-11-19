@@ -2,7 +2,7 @@
 
 React + Vite, built as a static site (S3 + CloudFront). Two screens:
 
-- **Login** (`#/login`): phone number → 6-digit SMS code. `src/auth.js` is a
+- **Login** (`#/login`): name, email and mobile number → 6-digit SMS code. `src/auth.js` is a
   **dev stub** (any 6 digits sign you in); swap in the real auth calls there.
 - **Game stats** (`#/stats`): next home game + Kalshi win probability, last
   result / discount status, season tiles, recent games, upcoming-home-games chart.

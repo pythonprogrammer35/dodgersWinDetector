@@ -56,6 +56,10 @@ export default function UserMenu({ session }) {
               <dd>{session.name || '—'}</dd>
             </div>
             <div>
+              <dt>Email</dt>
+              <dd>{session.email || '—'}</dd>
+            </div>
+            <div>
               <dt>Mobile number</dt>
               <dd>{phone || '—'}</dd>
             </div>
